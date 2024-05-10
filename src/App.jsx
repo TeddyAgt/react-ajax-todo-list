@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import TodoList from "./components/TodoList";
 import AddTodo from "./components/AddTodo";
+import todoReducer from "./reducers/todoReducer";
 
 function App() {
-  const [todoList, setTodoList] = useState([]);
+  const [state, dispatch] = useReducer(todoReducer, { todoList: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,9 +17,9 @@ function App() {
           const todos = await response.json();
           if (!shouldCancel) {
             if (Array.isArray(todos)) {
-              setTodoList(todos);
+              dispatch({ type: "FETCH_TODOS", todoList: todos });
             } else {
-              setTodoList([todos]);
+              dispatch({ type: "FETCH_TODOS", todoList: [todos] });
             }
           }
         } else {
@@ -37,17 +38,15 @@ function App() {
   }, []);
 
   function addTodo(newTodo) {
-    setTodoList([...todoList, newTodo]);
+    dispatch({ type: "ADD_TODO", todo: newTodo });
   }
 
   function deleteTodo(todoToDelete) {
-    setTodoList(todoList.filter((todo) => todo._id !== todoToDelete._id));
+    dispatch({ type: "DELETE_TODO", todo: todoToDelete });
   }
 
   function updateTodo(updatedTodo) {
-    setTodoList(
-      todoList.map((t) => (t._id === updatedTodo._id ? updatedTodo : t))
-    );
+    dispatch({ type: "UPDATE_TODO", todo: updatedTodo });
   }
 
   return (
@@ -59,7 +58,7 @@ function App() {
           <p>Chargement</p>
         ) : (
           <TodoList
-            todoList={todoList}
+            todoList={state.todoList}
             deleteTodo={deleteTodo}
             updateTodo={updateTodo}
           />

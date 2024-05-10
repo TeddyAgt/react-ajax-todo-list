@@ -1,1 +1,1 @@
-React + Tailwindcss
+React
